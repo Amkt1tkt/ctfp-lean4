@@ -1,12 +1,13 @@
 <script setup>
 // 交换图（commutative diagram）渲染器。由 ```diagram 围栏自动生成，语法见 STYLE.md。
-import { computed, ref, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import katex from 'katex'
 
 const props = defineProps({ spec: { type: String, required: true } })
 
 const UNIT = 110
 const PAD = 46
+const LOOP_PAD = 30
 const NODE_R = 20
 
 const COLORS = {
@@ -28,13 +29,25 @@ function parseOpts(s) {
 
 function tex(src) {
   // 让 "F a" 这类函数应用写法保留可见间距（KaTeX 默认会吞掉空格）
-  src = src.replace(/(?<=[A-Za-z0-9'')}\]])\s+(?=[A-Za-z0-9(])/g, '\\,')
+  src = src.replace(/(?<!\\[a-zA-Z]+)(?<=[A-Za-z0-9')}\]])\s+(?=[A-Za-z0-9(])/g, '\\,')
   try {
     return katex.renderToString(src, { throwOnError: false, displayMode: false })
   } catch {
     return src
   }
 }
+
+// 粗略估计 KaTeX 标签的显示宽度（px），用于裁剪箭头端点
+function labelWidth(src) {
+  const visible = src
+    .replace(/\\(mathrm|mathbf|mathcal|mathit|text|operatorname)\b/g, '')
+    .replace(/\\[a-zA-Z]+/g, 'X')
+    .replace(/[{}_^\\\s]/g, '')
+  return visible.length * 13
+}
+
+const measured = ref({})
+const svgEl = ref(null)
 
 const parsed = computed(() => {
   const nodes = []
@@ -67,7 +80,7 @@ const parsed = computed(() => {
       nodes.push({ id: m[1], x: Number(m[2]), y: Number(m[3]), label: m[4] !== undefined ? m[4] : m[1], dot: o.shape === 'dot', color: o.color })
     } else errors.push(raw)
   }
-  return { nodes, arrows, paths, caption, scale, errors }
+  return { nodes, arrows, paths, caption, captionHtml: caption.replace(/\$([^$]+)\$/g, (_, t) => tex(t)), scale, errors }
 })
 
 const geom = computed(() => {
@@ -83,12 +96,18 @@ const geom = computed(() => {
     const A = byId[a.from], B = byId[a.to]
     if (!A || !B) return []
     const p = P(A), q = P(B)
-    const rA = A.dot ? 7 : NODE_R, rB = B.dot ? 8 : NODE_R + 2
+    const radius = (n, vx, vy, extra = 0) => {
+      if (n.dot) return 7 + extra
+      const w = measured.value[n.id] ?? labelWidth(n.label)
+      const hw = Math.max(NODE_R - 6, w / 2 + 4), hh = 14
+      return Math.min(hw / (Math.abs(vx) || 1e-9), hh / (Math.abs(vy) || 1e-9)) + 2 + extra
+    }
     let d, lx, ly
     if (a.from === a.to) {
       const dirs = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
       const [dx, dy] = dirs[a.loop] || dirs.up
       const nx = -dy, ny = dx
+      const rA = radius(A, dx, dy)
       const s = { x: p.x + dx * rA + nx * 9, y: p.y + dy * rA + ny * 9 }
       const e = { x: p.x + dx * rA - nx * 9, y: p.y + dy * rA - ny * 9 }
       const L = 46
@@ -105,6 +124,7 @@ const geom = computed(() => {
       const rot = (vx, vy, t) => [vx * Math.cos(t) - vy * Math.sin(t), vx * Math.sin(t) + vy * Math.cos(t)]
       const [sx, sy] = rot(ux, uy, -ang * 1.0)
       const [ex, ey] = rot(-ux, -uy, ang * 1.0)
+      const rA = radius(A, sx, sy), rB = radius(B, ex, ey, 2)
       const s = { x: p.x + sx * rA, y: p.y + sy * rA }
       const e = { x: q.x + ex * rB, y: q.y + ey * rB }
       d = `M${s.x},${s.y} Q${mx * 2 - (s.x + e.x) / 2},${my * 2 - (s.y + e.y) / 2} ${e.x},${e.y}`
@@ -121,6 +141,7 @@ const geom = computed(() => {
   return {
     nodes: gnodes, arrows: garrows,
     w: (maxX - minX) * u + PAD * 2, h: (maxY - minY) * u + PAD * 2,
+    loopPad: arrows.some((a) => a.from === a.to) ? LOOP_PAD : 0,
   }
 })
 
@@ -162,6 +183,18 @@ function reset() {
   dot.value = null
 }
 
+onMounted(() => {
+  const svg = svgEl.value
+  if (!svg || !svg.clientWidth) return
+  const ratio = (geom.value.w + 2 * geom.value.loopPad) / svg.clientWidth
+  const m = {}
+  svg.querySelectorAll('[data-node]').forEach((el) => {
+    const k = el.querySelector('.katex') || el
+    m[el.dataset.node] = k.getBoundingClientRect().width * ratio
+  })
+  measured.value = m
+})
+
 onBeforeUnmount(() => cancelAnimationFrame(raf))
 
 const isLit = (id) => {
@@ -174,7 +207,7 @@ const isLit = (id) => {
 
 <template>
   <figure class="cat-diagram">
-    <svg :viewBox="`0 0 ${geom.w} ${geom.h}`" :width="geom.w" :style="{ maxWidth: '100%' }" role="img">
+    <svg ref="svgEl" :viewBox="`${-geom.loopPad} ${-geom.loopPad} ${geom.w + 2 * geom.loopPad} ${geom.h + 2 * geom.loopPad}`" :width="geom.w + 2 * geom.loopPad" :style="{ maxWidth: '100%' }" role="img">
       <defs>
         <marker :id="`ah-${uid}`" viewBox="0 0 10 10" refX="8.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 L3,5 z" fill="context-stroke" />
@@ -191,14 +224,14 @@ const isLit = (id) => {
           :marker-start="a.kind === '<->' ? `url(#ah-${uid})` : null"
         />
         <path v-if="a.kind === '=>'" :d="a.d" fill="none" stroke="var(--vp-c-bg)" :stroke-width="(isLit(a.id) ? a.width + 1.4 : a.width) - 2.4" pathLength="100" stroke-dasharray="90 100" />
-        <foreignObject v-if="a.label" :x="a.lx - 70" :y="a.ly - 14" width="140" height="28">
+        <foreignObject v-if="a.label" :x="a.lx - 110" :y="a.ly - 14" width="220" height="28">
           <div class="cd-label" :style="{ color: isLit(a.id) ? active.color : color(a.color) }" v-html="a.html" />
         </foreignObject>
       </g>
       <g v-for="n in geom.nodes" :key="n.id" class="cd-node">
         <circle v-if="n.dot" :cx="n.x" :cy="n.y" r="5" :fill="color(n.color)" />
-        <foreignObject :x="n.x - 80" :y="n.dot ? n.y - 34 : n.y - 16" width="160" height="32">
-          <div class="cd-label cd-node-label" :style="{ color: color(n.color) }" v-html="n.html" />
+        <foreignObject :x="n.x - 150" :y="n.dot ? n.y - 34 : n.y - 16" width="300" height="32">
+          <div :data-node="n.id" class="cd-label cd-node-label" :style="{ color: color(n.color) }" v-html="n.html" />
         </foreignObject>
       </g>
       <circle v-if="dot && !dot.done" :cx="dot.x" :cy="dot.y" r="6" :fill="active.color" class="cd-dot" />
@@ -209,7 +242,7 @@ const isLit = (id) => {
       </button>
       <button v-if="active" class="cd-reset" @click="reset">重置</button>
     </div>
-    <figcaption v-if="parsed.caption">{{ parsed.caption }}</figcaption>
+    <figcaption v-if="parsed.caption" v-html="parsed.captionHtml" />
     <pre v-if="parsed.errors.length" class="cd-error">无法解析：{{ parsed.errors.join('\n') }}</pre>
   </figure>
 </template>

@@ -214,7 +214,7 @@ h: A -> B "h" bend=30 dashed color=red
 # 路径动画：path "按钮文字": 箭头id1 箭头id2 ...  color=...   —— 点击按钮，一个光点沿路径依次走过并高亮
 path "先 f 再 g": f g
 path "直接走 g∘f": gf color=green
-caption: 图注文字（可选）
+caption: 图注文字（可选，支持 $...$ 行内公式）
 size: 1        # 整体缩放（可选）
 ```
 
