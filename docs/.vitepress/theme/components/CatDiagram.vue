@@ -169,7 +169,7 @@ function play(pi) {
   const per = 700
   const t0 = performance.now()
   const tick = (now) => {
-    const t = (now - t0) / per
+    const t = Math.max(0, (now - t0) / per)
     const i = Math.min(Math.floor(t), segs.length - 1)
     const frac = Math.min(1, t - i)
     const el = segs[i]

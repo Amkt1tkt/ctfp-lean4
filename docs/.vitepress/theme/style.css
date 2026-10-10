@@ -169,3 +169,10 @@
   color: var(--vp-c-text-2);
   margin-bottom: 10px;
 }
+
+/* 运算符如 >>=、>=>、=> 不显示为连字，避免读者误以为要输入 Unicode 符号 */
+.vp-doc code,
+.vp-doc pre {
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0, 'calt' 0;
+}
