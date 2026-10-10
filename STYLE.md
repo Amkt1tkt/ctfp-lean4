@@ -207,7 +207,7 @@ g: B -> C
 gf: A -> C "g \circ f" side=right
 idA: A -> A "\mathrm{id}_A" loop=left
 h: A -> B "h" bend=30 dashed color=red
-# 选项：bend=像素（正数向箭头左侧弯）  side=left|right（标签在哪侧） pos=0~1（标签位置）
+# 选项：bend=像素（正数向箭头左侧弯）  side=left|right（标签在哪侧；默认左侧，弯曲箭头默认在外侧） pos=0~1（标签位置）
 #       loop=up|down|left|right（自环方向） dashed  color=brand|red|green|orange|purple|gray|任意CSS色  width=线宽
 # 箭头种类：->  普通；-->  虚线（表示“唯一存在”的态射）；=>  双线箭头（自然变换）；<->  双向（同构）
 # 节点选项：shape=dot（画成小圆点，适合画集合元素）
