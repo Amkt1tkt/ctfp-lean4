@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import { parts } from './chapters.mjs'
+import { parts, chapters } from './chapters.mjs'
 import { fencePlugin } from './fences.mjs'
 
 const base = process.env.BASE ?? '/ctfp-lean4/'
@@ -17,6 +17,10 @@ export default defineConfig({
   description: 'Bartosz Milewski《Category Theory for Programmers》的中文 Lean 4 改写版',
   base,
   cleanUrls: true,
+  // 已登记在 chapters.mjs 中的章节路径视为合法（并行写作时页面可能尚未落地），其余死链照常报错。
+  ignoreDeadLinks: [
+    new RegExp(`(^|/)(${chapters.map((c) => c.link.slice(1).replace(/[/.]/g, '\\$&')).join('|')})(\\.md)?(#.*)?$`),
+  ],
   lastUpdated: true,
   head: [['link', { rel: 'icon', href: `${base}favicon.svg` }]],
   markdown: {
