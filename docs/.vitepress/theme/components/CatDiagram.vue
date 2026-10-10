@@ -27,6 +27,8 @@ function parseOpts(s) {
 }
 
 function tex(src) {
+  // 让 "F a" 这类函数应用写法保留可见间距（KaTeX 默认会吞掉空格）
+  src = src.replace(/(?<=[A-Za-z0-9'')}\]])\s+(?=[A-Za-z0-9(])/g, '\\,')
   try {
     return katex.renderToString(src, { throwOnError: false, displayMode: false })
   } catch {
@@ -174,7 +176,7 @@ const isLit = (id) => {
   <figure class="cat-diagram">
     <svg :viewBox="`0 0 ${geom.w} ${geom.h}`" :width="geom.w" :style="{ maxWidth: '100%' }" role="img">
       <defs>
-        <marker :id="`ah-${uid}`" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker :id="`ah-${uid}`" viewBox="0 0 10 10" refX="8.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 L3,5 z" fill="context-stroke" />
         </marker>
       </defs>
@@ -188,7 +190,7 @@ const isLit = (id) => {
           :marker-end="`url(#ah-${uid})`"
           :marker-start="a.kind === '<->' ? `url(#ah-${uid})` : null"
         />
-        <path v-if="a.kind === '=>'" :d="a.d" fill="none" stroke="var(--vp-c-bg)" stroke-width="1" />
+        <path v-if="a.kind === '=>'" :d="a.d" fill="none" stroke="var(--vp-c-bg)" :stroke-width="(isLit(a.id) ? a.width + 1.4 : a.width) - 2.4" pathLength="100" stroke-dasharray="90 100" />
         <foreignObject v-if="a.label" :x="a.lx - 70" :y="a.ly - 14" width="140" height="28">
           <div class="cd-label" :style="{ color: isLit(a.id) ? active.color : color(a.color) }" v-html="a.html" />
         </foreignObject>
