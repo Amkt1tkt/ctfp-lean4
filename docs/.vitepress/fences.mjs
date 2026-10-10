@@ -26,6 +26,12 @@ const escapeHtml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 export function fencePlugin(md) {
+  // markdown-it 的 HTML 块只认 [A-Za-z][A-Za-z0-9-]* 形式的标签名，`<Ch1_3Xxx />` 会被当成纯文本；
+  // 独占行的章节组件标签自动包一层 <div>。
+  md.core.ruler.before('block', 'ctfp-chapter-components', (state) => {
+    state.src = state.src.replace(/^([ \t]*)(<Ch\d+_\d+[A-Za-z0-9]*\b[\s\S]*?\/>)[ \t]*$/gm, '$1<div>$2</div>')
+  })
+
   const orig = md.renderer.rules.fence
   md.renderer.rules.fence = (tokens, idx, options, env, self) => {
     const token = tokens[idx]
