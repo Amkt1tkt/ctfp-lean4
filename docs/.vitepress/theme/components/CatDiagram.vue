@@ -73,7 +73,7 @@ const parsed = computed(() => {
         id: m[1], from: m[2], to: m[4], kind: m[3],
         label: m[5] !== undefined ? m[5] : m[1].replace(/'/g, "'"),
         bend: Number(o.bend || 0), dashed: !!o.dashed || m[3] === '-->', color: o.color,
-        loop: o.loop || 'up', side: o.side || 'left', pos: Number(o.pos || 0.5), width: Number(o.width || (m[3] === '=>' ? 3.6 : 1.6)),
+        loop: o.loop || 'up', side: o.side || null, pos: Number(o.pos || 0.5), width: Number(o.width || (m[3] === '=>' ? 3.6 : 1.6)),
       })
     } else if ((m = line.match(/^([\w']+)\s*:\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)\s*(?:"((?:[^"\\]|\\.)*)")?\s*(.*)$/))) {
       const o = parseOpts(m[5] || '')
@@ -132,17 +132,22 @@ const geom = computed(() => {
       const cx = mx * 2 - (s.x + e.x) / 2, cy = my * 2 - (s.y + e.y) / 2
       const bx = (1 - t) ** 2 * s.x + 2 * (1 - t) * t * cx + t * t * e.x
       const by = (1 - t) ** 2 * s.y + 2 * (1 - t) * t * cy + t * t * e.y
-      const sign = a.side === 'right' ? -1 : 1
+      const sign = a.side === 'right' ? -1 : a.side === 'left' ? 1 : a.bend < 0 ? -1 : 1
       const off = 16 + Math.min(10, a.label.length * 1.2)
       lx = bx + nx * off * sign; ly = by + ny * off * sign
     }
     return [{ ...a, d, lx, ly, html: tex(a.label) }]
   })
-  return {
-    nodes: gnodes, arrows: garrows,
-    w: (maxX - minX) * u + PAD * 2, h: (maxY - minY) * u + PAD * 2,
-    loopPad: arrows.some((a) => a.from === a.to) ? LOOP_PAD : 0,
+  const w = (maxX - minX) * u + PAD * 2, h = (maxY - minY) * u + PAD * 2
+  const lp = arrows.some((a) => a.from === a.to) ? LOOP_PAD : 0
+  let x0 = -lp, y0 = -lp, x1 = w + lp, y1 = h + lp
+  for (const a of garrows) {
+    if (!a.label) continue
+    const hw = labelWidth(a.label) / 2 + 8
+    x0 = Math.min(x0, a.lx - hw); x1 = Math.max(x1, a.lx + hw)
+    y0 = Math.min(y0, a.ly - 18); y1 = Math.max(y1, a.ly + 18)
   }
+  return { nodes: gnodes, arrows: garrows, w, h, vb: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } }
 })
 
 const active = ref(null) // { idx, ids, step }
@@ -186,7 +191,7 @@ function reset() {
 onMounted(() => {
   const svg = svgEl.value
   if (!svg || !svg.clientWidth) return
-  const ratio = (geom.value.w + 2 * geom.value.loopPad) / svg.clientWidth
+  const ratio = geom.value.vb.w / svg.clientWidth
   const m = {}
   svg.querySelectorAll('[data-node]').forEach((el) => {
     const k = el.querySelector('.katex') || el
@@ -207,7 +212,7 @@ const isLit = (id) => {
 
 <template>
   <figure class="cat-diagram">
-    <svg ref="svgEl" :viewBox="`${-geom.loopPad} ${-geom.loopPad} ${geom.w + 2 * geom.loopPad} ${geom.h + 2 * geom.loopPad}`" :width="geom.w + 2 * geom.loopPad" :style="{ maxWidth: '100%' }" role="img">
+    <svg ref="svgEl" :viewBox="`${geom.vb.x} ${geom.vb.y} ${geom.vb.w} ${geom.vb.h}`" :width="geom.vb.w" :style="{ maxWidth: '100%' }" role="img">
       <defs>
         <marker :id="`ah-${uid}`" viewBox="0 0 10 10" refX="8.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 L3,5 z" fill="context-stroke" />
