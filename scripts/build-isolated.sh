@@ -7,7 +7,9 @@ NAME=${1:?用法: build-isolated.sh <名字> [serve <端口>]}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 WORK=/tmp/vp-$NAME
 mkdir -p "$WORK"
-rsync -a --delete --exclude '.vitepress/cache' --exclude '.vitepress/dist' "$ROOT/docs/" "$WORK/docs/"
+rm -rf "$WORK/docs"
+cp -a "$ROOT/docs" "$WORK/docs"
+rm -rf "$WORK/docs/.vitepress/cache" "$WORK/docs/.vitepress/dist"
 ln -sfn "$ROOT/node_modules" "$WORK/node_modules"
 cp "$ROOT/package.json" "$WORK/package.json"
 cd "$WORK"
