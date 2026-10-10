@@ -227,7 +227,8 @@ size: 1        # 整体缩放（可选）
 Yoneda 的映射表、F-代数的折叠动画……）时，写 Vue 3 组件：
 
 - 放在 `docs/.vitepress/theme/components/ch/`，文件名 `Ch<编号下划线>Xxx.vue`，例如 `Ch1_5ProductRanking.vue`。
-  会被自动全局注册，直接在 md 中 `<Ch1_5ProductRanking />` 使用（独占一行，前后留空行）。
+  会被自动全局注册，直接在 md 中 `<Ch1_5ProductRanking />` 使用（独占一行，前后留空行，必须是自闭合 `/>` 写法；
+  markdown 插件会自动给它包一层 `<div>`，因为 markdown-it 不认含下划线的标签名）。
 - 使用 `<script setup>`，纯前端、无外部依赖（可以用已安装的 `katex`：`import katex from 'katex'`）。
 - **必须 SSR 安全**：不要在 setup 顶层访问 `window`/`document`，放到 `onMounted` 里。
 - 外层用 `<div class="ctfp-widget">`，标题用 `<div class="ctfp-widget-title">`，按钮可用 `class="ctfp-btn"`；
