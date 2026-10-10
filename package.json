@@ -1,0 +1,31 @@
+{
+  "name": "ctfp-lean4",
+  "version": "1.0.0",
+  "description": "程序员的范畴论（Lean 4 中文版）",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "check": "node scripts/check-code.mjs",
+    "check:lean": "node scripts/check-code.mjs --lean-only",
+    "check:rust": "node scripts/check-code.mjs --rust-only"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amkt1tkt/ctfp-lean4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Amkt1tkt/ctfp-lean4/issues"
+  },
+  "homepage": "https://github.com/Amkt1tkt/ctfp-lean4#readme",
+  "devDependencies": {
+    "katex": "^0.19.0",
+    "markdown-it": "^15.0.2",
+    "markdown-it-mathjax3": "^4.3.2",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.43"
+  },
+  "private": true,
+  "type": "module",
+  "license": "CC-BY-SA-4.0"
+}

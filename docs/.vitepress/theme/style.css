@@ -1,0 +1,171 @@
+:root {
+  --vp-c-brand-1: #3b6fd8;
+  --vp-c-brand-2: #5585e6;
+  --vp-c-brand-3: #2f5bb5;
+  --vp-font-family-base: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #3b6fd8 20%, #b35ad6 80%);
+}
+.dark {
+  --vp-c-brand-1: #7aa2f7;
+  --vp-c-brand-2: #8fb2fa;
+  --vp-c-brand-3: #5f8be8;
+}
+
+.vp-doc p,
+.vp-doc li {
+  line-height: 1.85;
+}
+
+/* ---------- Lean 代码块 ---------- */
+.vp-doc .lean-runnable {
+  position: relative;
+}
+.vp-doc .lean-run {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  z-index: 3;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2) !important;
+  text-decoration: none !important;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.vp-doc .lean-runnable:hover .lean-run {
+  opacity: 1;
+}
+.vp-doc .lean-run:hover {
+  color: var(--vp-c-brand-1) !important;
+  border-color: var(--vp-c-brand-1);
+}
+@media (hover: none) {
+  .vp-doc .lean-run {
+    opacity: 1;
+  }
+}
+.vp-doc .lean-nocheck div[class*='language-']::before {
+  content: '示意（不编译）';
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+  z-index: 2;
+}
+.vp-doc .lean-nocheck div[class*='language-'] pre {
+  padding-top: 26px;
+}
+
+/* ---------- 交换图 ---------- */
+.cat-diagram {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cat-diagram svg {
+  overflow: visible;
+  height: auto;
+}
+.cat-diagram .cd-label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.cat-diagram .cd-node-label {
+  font-size: 17px;
+}
+.cat-diagram .cd-arrow path {
+  transition: stroke 0.25s, stroke-width 0.25s, opacity 0.25s;
+}
+.cat-diagram .cd-arrow.dim {
+  opacity: 0.35;
+}
+.cat-diagram .cd-dot {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+.cat-diagram .cd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 6px;
+}
+.cat-diagram .cd-controls button,
+.ctfp-btn {
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-diagram .cd-controls button:hover,
+.cat-diagram .cd-controls button.on,
+.ctfp-btn:hover,
+.ctfp-btn.on {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+.cat-diagram figcaption,
+.vp-doc figure figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  text-align: center;
+  max-width: 560px;
+}
+.cat-diagram .cd-error {
+  color: var(--vp-c-danger-1);
+  font-size: 12px;
+}
+
+/* ---------- 原书插图 ---------- */
+.vp-doc img {
+  display: block;
+  margin: 20px auto;
+  max-height: 420px;
+  border-radius: 8px;
+}
+.vp-doc .img-caption {
+  display: block;
+  margin: -8px auto 20px;
+  max-width: 560px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  text-align: center;
+  line-height: 1.6;
+}
+.dark .vp-doc img.sketch,
+.dark .vp-doc p > img {
+  filter: invert(0.88) hue-rotate(180deg);
+}
+
+/* ---------- 交互组件通用外框 ---------- */
+.ctfp-widget {
+  margin: 24px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+.ctfp-widget .ctfp-widget-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  margin-bottom: 10px;
+}
