@@ -39,8 +39,9 @@ node scripts/check-code.mjs <你的每个 md 文件>        # 必须全部 OK；
 scripts/build-isolated.sh <你的代号>                   # 必须 build complete，无报错
 ```
 
-- 若要在浏览器里看效果：`scripts/build-isolated.sh <代号> serve <端口>`（用 tmux 后台运行），再用
-  `timeout 40 google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1300,3000 --screenshot=/tmp/<名>.png http://localhost:<端口>/ctfp-lean4/<路径>`
+- 若要在浏览器里看效果：`scripts/build-isolated.sh <代号> serve <端口>`（用 tmux 后台运行；每次重新构建后要重启预览），再用
+  `timeout 40 google-chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/chrome-<代号> --hide-scrollbars --window-size=1300,3000 --screenshot=/tmp/<名>.png http://localhost:<端口>/ctfp-lean4/<路径>`
+  （URL 不要带 `#锚点`，否则截图空白）
   截图，并用读图工具查看你的交互组件和交换图是否美观、标签是否重叠。强烈建议至少检查一次。
 - **不要运行任何 git 命令**；不要修改 `STYLE.md`、`chapters.mjs`、`Prelude.lean`、`config.mjs`、主题 `index.js`、`CatDiagram.vue`、
   以及其他作者的文件。若你认为公共设施有 bug 或缺功能，在最终回复里说明，由总编处理（你可以在自己的组件里自行实现所需功能）。
